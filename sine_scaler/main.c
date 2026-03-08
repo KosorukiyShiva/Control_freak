@@ -299,12 +299,12 @@ int mapmaker(int source_table[], int source_table_size, int* map){
  int middle;
  int transfer_mother, transfer_source, pos;
   if(source_table_size % 2 == 0){
-    map[0] = source_table[0];
-    map[1] = source_table[(source_table_size-1)/2];
+    map[0] = 0;
+    map[1] = (source_table_size/2)-1;
   }
   else if(source_table_size % 2 != 0){
-    map[0] = source_table[0];
-    map[1] = source_table[(source_table_size)/2];
+    map[0] = 0;
+    map[1] = source_table_size/2;
   }
   middle = map[1]/2;
   // locales[0] = middle;
@@ -329,19 +329,12 @@ int mapmaker(int source_table[], int source_table_size, int* map){
         if(locales[i+1] == 1){
           rl = locales[i];
           transfer_source = (ll + rl)/2;
-          // SLBinTreeInsert(bt,transfer_source);
           break;
         }
       }
     }
-
-
-
-
-
-
-    while( ll != map[1]-1){ //(transfer_source - ll >= 1) &&
-      if (transfer_source == 42){
+    while( ll != map[1]-1){
+      if (transfer_source == 62){ //breakpoint trap
         printf("12");
       }
       SLBinTreeInsert(bt,transfer_source);
@@ -360,11 +353,6 @@ int mapmaker(int source_table[], int source_table_size, int* map){
       }
       
 
-
-
-      if(ll ==23){
-        printf("asd");
-      }
       if(rl - transfer_source == 1){
         ll = rl ;
         for(int i = 0; i <8; i++){
@@ -410,5 +398,13 @@ int mapmaker(int source_table[], int source_table_size, int* map){
       
     }
   }
+
+  /*
+  1.находим первое знаение после сид значения и фиксируем его
+  2.обход происходит по уровню, с очередностью сначала левые корни потом все правые на одном уровне 
+  3. 
+
+  */
+
 
 }
