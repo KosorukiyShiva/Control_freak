@@ -25,7 +25,7 @@ void plot(int sine_table[],int num_of_div);
 void plot_3ph(int sine_table1[],int sine_table2[],int sine_table3[],int num_of_div);
 int SLBinTreeInsert(BinTree* bt, int position);
 void BinTreeInit(BinTree* bt); 
-int mapmaker(int source_table[], int source_table_size, int* map);
+int MapMaker(int source_table[], int source_table_size, int* map);
 
 int main(){
     // comp(duty, size, sine_table);
@@ -33,9 +33,9 @@ int main(){
     
 
     // printf("%d", sine_table[130]);
-    mapmaker(sine_table, sine_table_size,map);
-    printf("%d \n", map[0]);
-    printf("%d \n", map[1]);
+    MapMaker(sine_table, sine_table_size,map);
+    // printf("%d \n", map[0]);
+    // printf("%d \n", map[1]);
     return 0;
 }
 typedef struct table_characteristic
@@ -283,7 +283,51 @@ int SLBinTreeInsert(BinTree* bt, int position){
   }
   
 }
-int mapmaker(int source_table[], int source_table_size, int* map){
+
+int SearchNode(BinTree* bt, int position, char side){
+  Node* transfer = bt->seed_node;
+  switch (side)
+  {
+  case 'l':
+    while(transfer->pos != position ){
+      if(position <= transfer->pos && transfer->left != NULL || transfer->pos == bt->seed ){
+        transfer = transfer->left;
+        continue;
+      }
+      if(position >= transfer->pos && transfer->right != NULL){
+        transfer = transfer->right;
+        continue;
+      }
+      
+    }
+    if(transfer->left == NULL){
+      return 0;
+    }    
+    return transfer->left->pos;
+    break;
+  case 'r':
+    while(transfer->pos != position ){
+      if(position <= transfer->pos && transfer->left != NULL || transfer->pos == bt->seed ){
+        transfer = transfer->left;
+        continue;
+      }
+      if(position >= transfer->pos && transfer->right != NULL){
+        transfer = transfer->right;
+        continue;
+      }
+    }
+    if(transfer->right == NULL){
+      return 0;
+    } 
+    return transfer->right->pos;
+    break;
+  default:
+    break;
+  }
+}
+
+
+int MapMaker(int source_table[], int source_table_size, int* map){
   /*
   1. поиск серидины
   2. заполнение самой левой ветви пока эл-n не будет == 1 
@@ -292,9 +336,14 @@ int mapmaker(int source_table[], int source_table_size, int* map){
   5. повторить до заполенения 
   */
  BinTree* bt = (BinTree*) malloc(sizeof(BinTree));
- int locales[8]={0}; 
+ int locales[8] = {0}; 
+ int frame_1[64] = {0};
+ int frame_2[64] = {0};
  int remainder = -1;
  int i = 0;
+ int j = 0;
+ int k = 6;
+ int deep = -1;
  int ll,rl;
  int middle;
  int transfer_mother, transfer_source, pos;
@@ -314,6 +363,7 @@ int mapmaker(int source_table[], int source_table_size, int* map){
   // return 0;
   while(transfer_source >= 1){
     i++;
+    deep++;
     rl = transfer_source;
     SLBinTreeInsert(bt,transfer_source);  
     locales[i-1] = transfer_source;
@@ -321,7 +371,7 @@ int mapmaker(int source_table[], int source_table_size, int* map){
     ll = transfer_source;
     // remainder ++;
   }
-  printf("%d \n",map[0]);
+  // printf("%d \n",map[0]);
   while(map[1]-ll >1){
     if(ll == 0){
       ll = 1;
@@ -329,21 +379,29 @@ int mapmaker(int source_table[], int source_table_size, int* map){
         if(locales[i+1] == 1){
           rl = locales[i];
           transfer_source = (ll + rl)/2;
+          // deep++;
           break;
         }
       }
     }
-    while( ll != map[1]-1){
-      if (transfer_source == 62){ //breakpoint trap
+    while( ll != map[2]){
+      if (transfer_source == 20){ //breakpoint trap
         printf("12");
       }
       SLBinTreeInsert(bt,transfer_source);
-      if(transfer_source - ll == 1){
+      if(transfer_source - ll == 1 ){
         ll = transfer_source;
+        locales[deep] = transfer_source;
       }
       if(transfer_source - ll > 1){
         rl = transfer_source;
         transfer_source = (rl + ll)/2;
+        for(int i = 0; i < deep; i++){
+          if(transfer_source < locales[i] && transfer_source > locales[i+1]){
+            locales[i+1] = transfer_source;
+            break;
+          }
+        }
         continue;
       }
       if(transfer_source - ll == 0 && rl - transfer_source != 1){
@@ -353,58 +411,147 @@ int mapmaker(int source_table[], int source_table_size, int* map){
       }
       
 
+
+
+
       if(rl - transfer_source == 1){
-        ll = rl ;
-        for(int i = 0; i <8; i++){
-        if(locales[i+1] == rl ){
-          rl = locales[i];
-          transfer_source = (ll + rl)/2;
-          // SLBinTreeInsert(bt,transfer_source);
-          // remainder --;
-          if(ll == locales[1] && rl == locales[0]){
-            locales[1] = (locales[0] + locales[1])/2;
-            SLBinTreeInsert(bt,transfer_source);
-            i = 1;
-            while(transfer_source-1 >= ll){
-              rl = transfer_source;
-              locales[i] = rl;
-              transfer_source = (rl + ll)/2;
-              SLBinTreeInsert(bt,transfer_source);
-              i++;
+        ll=rl;
+        for(int i =0; i < 8; i++){
+          if(locales[i+1] == rl ){
+            rl = locales[i];
+            locales[deep] = ll;
+            transfer_source = (ll + rl)/2;
+            for(int i = 0; i < deep; i++){
+              if(transfer_source < locales[i] && transfer_source > locales[i+1]){
+                locales[i+1] = transfer_source;
+                break;
+              }
+              if(transfer_source - ll == 1){
+                break;
+              }
             }
+            if(ll == locales[1] && rl == locales[0]){
+              locales[1] = (locales[0] + locales[1])/2;
+              SLBinTreeInsert(bt,transfer_source);
+              i = 1;
+              while(transfer_source-1 >= ll){
+                rl = transfer_source;
+                locales[i] = rl;
+                transfer_source = (rl + ll)/2;
+                SLBinTreeInsert(bt,transfer_source);
+                i++;
+              }
             locales[i] = ll;
-            printf("loc");
+            }
+            break;
           }
-          break;
         }
-        else if((locales[i+1] < rl) && (locales[i] > rl) && ((locales[i]+locales[i+1])/2 > rl) ){
-          ll = rl;
-          rl = (locales[i]+locales[i+1])/2;
-          transfer_source = (ll + rl)/2;
-          // SLBinTreeInsert(bt,transfer_source);
-          // remainder --;
-          break;
-        }
-        else if((locales[i+1] < rl) && (locales[i] > rl) ){
-          ll = rl;
-          rl = locales[i];
-          transfer_source = (ll + rl)/2;
-          // remainder --;
-          // SLBinTreeInsert(bt,transfer_source);
-          break;
-        }
-      } 
       }
+
+
+
+
+      // if(rl - transfer_source == 1){
+      //   ll = rl ;
+      //   for(int i = 0; i <8; i++){
+      //   if(locales[i+1] == rl ){
+      //     rl = locales[i];
+      //     transfer_source = (ll + rl)/2;
+      //     if(ll == locales[1] && rl == locales[0]){
+      //       locales[1] = (locales[0] + locales[1])/2;
+      //       SLBinTreeInsert(bt,transfer_source);
+      //       i = 1;
+      //       while(transfer_source-1 >= ll){
+      //         rl = transfer_source;
+      //         locales[i] = rl;
+      //         transfer_source = (rl + ll)/2;
+      //         SLBinTreeInsert(bt,transfer_source);
+      //         i++;
+      //       }
+      //       locales[i] = ll;
+      //     }
+      //     break;
+      //   }
+      //   else if((locales[i+1] < rl) && (locales[i] > rl) && ((locales[i]+locales[i+1])/2 > rl) ){
+      //     ll = rl;
+      //     rl = (locales[i]+locales[i+1])/2;
+      //     transfer_source = (ll + rl)/2;
+      //     break;
+      //   }
+      //   else if((locales[i+1] < rl) && (locales[i] > rl) ){
+      //     ll = rl;
+      //     rl = locales[i];
+      //     transfer_source = (ll + rl)/2;
+      //     break;
+      //   }
+      // } 
+      // }
       
     }
+    break;
   }
-
+  i = 0;
+  // printf("chayka");
   /*
   1.находим первое знаение после сид значения и фиксируем его
   2.обход происходит по уровню, с очередностью сначала левые корни потом все правые на одном уровне 
   3. 
-
+  
   */
+  frame_1[0] = bt->seed_node->left->left->pos;
+  frame_1[1] = bt->seed_node->left->right->pos;
+  map[3] = bt->seed_node->left->pos;
+  map[4] = frame_1[0];
+  map[5] = frame_1[1];
+  printf(" %d, ", map[0]);
+  printf(" %d, ", map[1]);
+  printf(" %d, ", map[2]);
+  printf(" %d, ", map[3]);
+  printf(" %d, ", map[4]);
+  printf(" %d, ", map[5]);
+  while(map[bt->seed + 1] == 0){
+    while(frame_1[i] != 0){
+      frame_2[i] = SearchNode(bt,frame_1[i],'l');
+      i++;
+    }
+    if (i == 0){
+      return 0;
+    }
+    while(j != i ){
+      frame_2[i+j] = SearchNode(bt,frame_1[j],'r');
+      j++;
+    }
+    i = j = 0;
+    while(frame_2[i] != 0){
+      map[k] = frame_2[i];
+      printf("%d, ", map[k]);
+      k++;
+      i++;
+    }
+    i = 0;
+    while(frame_2[i] != 0){
+      // if (frame_2[i] = 21){
+      //   printf("sas");
+      // }
+      frame_1[i] = SearchNode(bt, frame_2[i],'l');
+      i++;
+    }
+    if (i == 0){
+      return 0;
+    }
+    while(j != i){
+      frame_1[i+j] = SearchNode(bt,frame_2[j],'r');
+      j++;
+    }
+    i = j = 0;
+    while (frame_1[i] != 0){
+      map[k] = frame_1[i];
+      printf("%d, ", map[k]);
+      i++;
+      k++;
+    }
+    i = 0;
+  }
 
 
 }
