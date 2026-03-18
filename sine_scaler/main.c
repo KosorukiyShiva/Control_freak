@@ -5,6 +5,7 @@
 int sine_table[] = {0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 3, 3, 3, 4, 4, 5, 6, 6, 7, 7, 8, 9, 9, 10, 11, 12, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 35, 36, 37, 38, 39, 40, 42, 43, 44, 45, 46, 48, 49, 50, 51, 52, 54, 55, 56, 57, 58, 60, 61, 62, 63, 64, 65, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 86, 87, 88, 89, 90, 90, 91, 92, 92, 93, 93, 94, 95, 95, 96, 96, 96, 97, 97, 98, 98, 98, 98, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 98, 98, 98, 98, 97, 97, 96, 96, 96, 95, 95, 94, 94, 93, 92, 92, 91, 90, 90, 89, 88, 87, 87, 86, 85, 84, 83, 82, 81, 80, 79, 78, 77, 76, 75, 74, 73, 72, 71, 70, 69, 68, 67, 66, 64, 63, 62, 61, 60, 59, 57, 56, 55, 54, 53, 51, 50, 49, 48, 47, 45, 44, 43, 42, 41, 39, 38, 37, 36, 35, 34, 32, 31, 30, 29, 28, 27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 13, 12, 11, 10, 9, 9, 8, 7, 7, 6, 6, 5, 4, 4, 3, 3, 3, 2, 2, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0};
 int sine_table_size = sizeof(sine_table)/sizeof(sine_table[0]);
 int map[130];
+int map1[130];
   
 #define duty 100
 
@@ -35,7 +36,7 @@ int main(){
     // printf("%d", sine_table[130]);
     MapMaker(sine_table, sine_table_size,map);
     // printf("%d \n", map[0]);
-    // printf("%d \n", map[1]);
+    printf(" \n");
     return 0;
 }
 typedef struct table_characteristic
@@ -201,55 +202,7 @@ Node* CreateNode(int position,Node *mother){
   Nu->mother = mother;
 } 
 
-// int BinTreeInsert(BinTree *Bt, int position){
-//   Node* transfer;
-//   if(Bt -> seed_node == NULL){ // первый элемент, с заданием сид значения 
-//     Bt->seed = position;
-//     Bt->seed_node =CreateNode(position,NULL);
-//     Bt->seed_node -> childs_counts_right = CreateNode(NULL,NULL);
-//   }
-//   else{
-//     transfer = Bt->seed_node;
-//     if(transfer->mother == NULL ){
-//       transfer = transfer->childs_counts_left;
-//     }
-//     while(1){
-//       if(transfer->childs_counts_left == transfer->childs_counts_right && transfer->left != NULL && transfer->right !=NULL){
-//         transfer->childs_counts_left ++;
-//         transfer = transfer->left; 
-//       }
-//       else if(transfer->childs_counts_left > transfer->childs_counts_right && transfer->left != NULL && transfer->right !=NULL){
-//         transfer->childs_counts_right ++;
-//         transfer = transfer->right;
-//       }
-//       if(transfer->childs_counts_left == 0 ||  transfer->childs_counts_right == 0){
-//         break;
-//       }
-//     }
-//     if(transfer->childs_counts_left == 0 && transfer->childs_counts_right == 0){
-//       transfer->childs_counts_left ++;
-//       transfer->left = CreateNode(position,transfer);
-//     }
-//     else if(transfer->childs_counts_left == 1 && transfer->childs_counts_right == 0){
-//       transfer->childs_counts_right ++;
-//       transfer->right = CreateNode(position, transfer);
-//     }
-//   }
-// }
 
-// int mapmaker(int source_table[], int source_table_size, int map[]){
-//   BinTree* bt;
-//   if(source_table[0] == source_table[source_table_size-1]){ // симетричные исходные сигналы 
-//     map[0] = source_table[0];
-//     map[1] = source_table[(source_table_size/2)-1];
-//     if((source_table_size/4)%2 == 0) //для четного кол-ва элементов
-//     {
-//       BinTreeInsert(bt,source_table_size/4);
-//       BinTreeInsert(bt,source_table_size/8);
-
-//     }
-//   }
-// }
 void BinTreeInit(BinTree* bt){
   bt->seed = 0;
   bt->seed_node = NULL;
@@ -385,9 +338,9 @@ int MapMaker(int source_table[], int source_table_size, int* map){
       }
     }
     while( ll != map[2]){
-      if (transfer_source == 20){ //breakpoint trap
-        printf("12");
-      }
+      // if (transfer_source == 20){ //breakpoint trap
+      //   // printf("12");
+      // }
       SLBinTreeInsert(bt,transfer_source);
       if(transfer_source - ll == 1 ){
         ll = transfer_source;
@@ -447,45 +400,6 @@ int MapMaker(int source_table[], int source_table_size, int* map){
           }
         }
       }
-
-
-
-
-      // if(rl - transfer_source == 1){
-      //   ll = rl ;
-      //   for(int i = 0; i <8; i++){
-      //   if(locales[i+1] == rl ){
-      //     rl = locales[i];
-      //     transfer_source = (ll + rl)/2;
-      //     if(ll == locales[1] && rl == locales[0]){
-      //       locales[1] = (locales[0] + locales[1])/2;
-      //       SLBinTreeInsert(bt,transfer_source);
-      //       i = 1;
-      //       while(transfer_source-1 >= ll){
-      //         rl = transfer_source;
-      //         locales[i] = rl;
-      //         transfer_source = (rl + ll)/2;
-      //         SLBinTreeInsert(bt,transfer_source);
-      //         i++;
-      //       }
-      //       locales[i] = ll;
-      //     }
-      //     break;
-      //   }
-      //   else if((locales[i+1] < rl) && (locales[i] > rl) && ((locales[i]+locales[i+1])/2 > rl) ){
-      //     ll = rl;
-      //     rl = (locales[i]+locales[i+1])/2;
-      //     transfer_source = (ll + rl)/2;
-      //     break;
-      //   }
-      //   else if((locales[i+1] < rl) && (locales[i] > rl) ){
-      //     ll = rl;
-      //     rl = locales[i];
-      //     transfer_source = (ll + rl)/2;
-      //     break;
-      //   }
-      // } 
-      // }
       
     }
     break;
@@ -524,7 +438,9 @@ int MapMaker(int source_table[], int source_table_size, int* map){
     i = j = 0;
     while(frame_2[i] != 0){
       map[k] = frame_2[i];
-      printf("%d, ", map[k]);
+      k++;
+      map[k] = frame_2[i]+map[2]; 
+      printf("%d, %d, ",map[k-1], map[k]);
       k++;
       i++;
     }
@@ -546,12 +462,26 @@ int MapMaker(int source_table[], int source_table_size, int* map){
     i = j = 0;
     while (frame_1[i] != 0){
       map[k] = frame_1[i];
-      printf("%d, ", map[k]);
+      k++;
+      map[k] = frame_1[i]+map[2]; 
+      printf("%d, %d, ",map[k-1], map[k]);
+      // printf("%d, ", map[k]);
       i++;
       k++;
     }
     i = 0;
   }
-
+  map[k]= map[2]+map[2];
+  printf("%d, ",map[k]);
+  k++;
+  map[k]= map[3]+map[2];
+  printf("%d, ",map[k]);
+  k++;
+  map[k]= map[4]+map[2];
+  printf("%d, ",map[k]);
+  k++;
+  map[k]= map[5]+map[2];
+  printf("%d, ",map[k]);
+  k++;
 
 }
