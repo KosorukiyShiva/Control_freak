@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <math.h>
 
@@ -6,8 +7,10 @@ int sine_table[] = {0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 3, 3, 3, 4, 4, 5, 
 int sine_table_size = sizeof(sine_table)/sizeof(sine_table[0]);
 int map[130];
 int map1[130];
+
+uint8_t PWM_ch1[260]={0};
   
-#define duty 100
+// #define duty 100
 
 typedef struct node{
   int pos, count, childs_counts_left, childs_counts_right;
@@ -28,6 +31,14 @@ int SLBinTreeInsert(BinTree* bt, int position);
 void BinTreeInit(BinTree* bt); 
 int MapMaker(int source_table[], int source_table_size, int* map);
 
+
+uint16_t SIZE  = 0; // size for pwm_dma_start length
+uint16_t SIGNAL_SIZE = sizeof(sine_table)/sizeof(sine_table[0]);
+uint16_t MAP_SIZE = sizeof(map)/sizeof(map[0]);
+
+uint8_t  sort_signal( int* map, uint8_t duty, uint8_t* PWM_ch1);
+uint8_t mirror_signal(uint16_t SIZE, uint8_t* PWM_ch1);
+
 int main(){
     // comp(duty, size, sine_table);
     int test = 9/2;
@@ -35,8 +46,11 @@ int main(){
 
     // printf("%d", sine_table[130]);
     MapMaker(sine_table, sine_table_size,map);
+    sort_signal(map,127,PWM_ch1);
+    mirror_signal(SIZE, PWM_ch1);
     // printf("%d \n", map[0]);
     printf(" \n");
+    plot((int*)PWM_ch1,(int) SIZE );
     return 0;
 }
 typedef struct table_characteristic
@@ -485,3 +499,77 @@ int MapMaker(int source_table[], int source_table_size, int* map){
   k++;
 
 }
+
+
+
+
+
+ 
+ typedef enum {
+	 OFF,
+//	 SMLL_FRC,
+//	 BG_FRC,
+	 ON
+ }duty_subrange;
+
+duty_subrange st_sbr = OFF;
+uint8_t  sort_signal( int* map, uint8_t duty, uint8_t* PWM_ch1){
+  /*
+  1. range of duty = 0-128    error code: 1
+
+	  */
+	 uint8_t swap_val1 = 0;
+	 if(duty > 128){
+		 st_sbr = OFF;
+		 SIZE = 0;
+		 return 1;
+	 }
+	 if(duty == 0){
+		 st_sbr = OFF;
+	 }
+//	 else if (duty != 0 && duty <=40) {
+//		st_sbr = SMLL_FRC;
+//	}
+//	 else if(duty > 40 && duty <= 100){
+//		 st_sbr = BG_FRC;
+//	 }
+	 else if (duty > 0 && duty <= 256) {
+		st_sbr = ON;
+	}
+
+	 PWM_ch1[0] = sine_table[map[0]];
+	 switch (st_sbr) {
+		case OFF:
+			SIZE = 0;
+			break;
+		case ON:
+			SIZE = SIGNAL_SIZE - duty*2;
+			for (int i = 0 ; i < SIZE/2; i++ ){
+				if(i == 0){
+					PWM_ch1[0] = sine_table[0];
+					swap_val1 = map[1];
+					continue;
+				}
+				for(int k = 0; k < SIZE/2; k++){
+					if(map[k] > PWM_ch1[i-1] && map[k] < swap_val1){
+						swap_val1 = map[k];
+					}
+				}
+        PWM_ch1[i] = swap_val1 ;
+        swap_val1 = map[1];
+			}
+      for (int i = 0; i < SIZE/2; i++ ){
+        PWM_ch1[i] = (uint8_t) sine_table[PWM_ch1[i]];
+      }
+			break;
+		default:
+			break;
+	}
+ };
+
+ uint8_t mirror_signal(uint16_t SIZE, uint8_t* PWM_ch1){
+  for(int i = 0; i < SIZE/2; i++){
+    PWM_ch1[i+SIZE/2] = PWM_ch1[SIZE/2 -(1 + i)];
+  }
+  return 0;
+ }
